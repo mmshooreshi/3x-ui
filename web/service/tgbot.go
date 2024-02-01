@@ -238,8 +238,11 @@ func (t *Tgbot) answerCommand(message *telego.Message, chatId int64, isAdmin boo
 	case "id":
 		onlyMessage = true
 	case "farzam":
-		onlyMessage = true
-		msg += "FARZAMMMM"
+		msg += "Hi, "
+		if isAdmin {
+			msg += t.I18nBot("tgbot.commands.welcome", "Hostname=="+hostname)
+		}
+		msg += "\n\n u farzam, am i right?"
 	case "usage":
 		onlyMessage = true
 		if len(commandArgs) > 0 {
