@@ -29,8 +29,3 @@ COPY --from=builder /go/bin/air /bin/air
 COPY --from=builder /app/.air.toml /.air.toml
 
 CMD ["air"]
-
-
-go mod init example.com/mymodule
-# Add your dependencies
-go get <dependency>
