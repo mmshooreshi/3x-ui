@@ -1,5 +1,5 @@
 # Use the official Golang image as the builder base
-FROM golang:latest as builder
+FROM golang:1.21.6-alpine as builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -20,7 +20,7 @@ RUN go install github.com/cosmtrek/air@latest && \
     which air
 
 # Start a new stage from the base Golang image for the final build
-FROM golang:latest
+FROM golang:1.21.6-alpine
 
 # Set the working directory
 WORKDIR /app
