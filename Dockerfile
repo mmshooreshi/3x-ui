@@ -1,29 +1,33 @@
-# Start from the official Golang image to create a build artifact.
+# Use the official Golang image as the builder base
 FROM golang:latest as builder
 
+# Set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies
+# Install git, required for fetching Go dependencies
 RUN apk add --no-cache git
 
-# Copy go mod and sum files 
+# Copy go.mod and go.sum first to leverage Docker cache for dependency download
 COPY go.mod go.sum ./
-
-# Download all dependencies.
 RUN go mod download
 
-# Copy the source code and .air.toml file.
+# Copy the rest of the source code and .air.toml
 COPY . .
 
-# Install Air for hot reloading
-# Ensure air is installed in a globally accessible location
-RUN go install github.com/cosmtrek/air@latest
+# Install Air for hot reloading, ensuring it's in a globally accessible location
+RUN go install github.com/cosmtrek/air@latest && \
+    # Verify air installation
+    which air
 
-# Verify that air is installed
-RUN which air
-
-# This stage builds the application.
+# Start a new stage from the base Golang image for the final build
 FROM golang:latest
-RUN go get -u github.com/cosmtrek/air
+
+# Set the working directory
 WORKDIR /app
+
+# Copy compiled assets from the builder stage
+COPY --from=builder /app /app
+COPY --from=builder /go/bin/air /usr/local/bin
+
+# Set the entrypoint to air for live reloading
 ENTRYPOINT ["air"]
