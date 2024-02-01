@@ -1,22 +1,18 @@
 version: "3.8"
+
 services:
   3x-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: 3x-ui
-    build: .
-    image: 3x-ui:latest
-    command: air
-    ports:
-      - 8080:8080
     volumes:
-      - $PWD:/app
-      # - /path/to/your/other/volume:/path/in/container
-      - $PWD/db:/etc/x-ui/
-      - $PWD/cert:/root/cert/
+      - ./:/app
+      - /etc/x-ui:/etc/x-ui
+    ports:
+      - "8980:8080" # Adjust the port according to your application's needs
     environment:
-      - ENV_VAR_NAME=your_value
-    networks:
-      - your_network
-
-networks:
-  your_network:
-    driver: bridge
+      - TZ=Asia/Tehran
+    network_mode: host
+    restart: unless-stopped
+    command: air
