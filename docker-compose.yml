@@ -1,14 +1,22 @@
-version: "3"
-
+version: "3.8"
 services:
   3x-ui:
-    build: .
     container_name: 3x-ui
+    build: .
+    image: 3x-ui:latest
+    command: air
+    ports:
+      - 8080:8080
     volumes:
-      - $PWD:/app # Mount the project directory inside the container
+      - $PWD:/app
+      # - /path/to/your/other/volume:/path/in/container
       - $PWD/db:/etc/x-ui/
       - $PWD/cert:/root/cert/
     environment:
-      XRAY_VMESS_AEAD_FORCED: "false"
-    network_mode: host
-    restart: unless-stopped
+      - ENV_VAR_NAME=your_value
+    networks:
+      - your_network
+
+networks:
+  your_network:
+    driver: bridge

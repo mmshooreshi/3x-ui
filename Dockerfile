@@ -1,33 +1,31 @@
-# Use the official Golang image as the builder base
-FROM golang:1.21.6-alpine as builder
+# Start from the latest golang base image
+FROM golang:1.21.6
 
-# Set the working directory inside the container
+# Update and install necessary packages
+RUN apt-get update && apt-get install -y curl
+
+# Install any additional dependencies if required
+
+# Install Air for live reloading
+RUN go install github.com/cosmtrek/air@latest
+
+# Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Install git, required for fetching Go dependencies
-RUN apk add --no-cache git
-
-# Copy go.mod and go.sum first to leverage Docker cache for dependency download
+# Copy the Go modules and sum files
 COPY go.mod go.sum ./
+
+# Download all dependencies.
 RUN go mod download
 
-# Copy the rest of the source code and .air.toml
+# Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Install Air for hot reloading, ensuring it's in a globally accessible location
-RUN go install github.com/cosmtrek/air@latest && \
-    # Verify air installation
-    which air
+# Copy the Air configuration file
+COPY .air.toml ./
 
-# Start a new stage from the base Golang image for the final build
-FROM golang:1.21.6-alpine
+# Expose the port that your app runs on
+EXPOSE 8080
 
-# Set the working directory
-WORKDIR /app
-
-# Copy compiled assets from the builder stage
-COPY --from=builder /app /app
-COPY --from=builder /go/bin/air /usr/local/bin
-
-# Set the entrypoint to air for live reloading
-ENTRYPOINT ["air"]
+# Command to run Air for live reloading
+CMD ["air"]
