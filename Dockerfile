@@ -1,50 +1,32 @@
-# ========================================================
-# Stage: Builder
-# ========================================================
-FROM golang:1.21-alpine AS builder
+# Start from the official Golang image to create a build artifact.
+FROM golang:1.21.6-alpine as builder
+
+# This stage installs all the dependencies.
 WORKDIR /app
-ARG TARGETARCH
 
-RUN apk --no-cache --update add \
-  build-base \
-  gcc \
-  wget \
-  unzip
+# Install system dependencies
+RUN apk add --no-cache git
 
+# Copy go mod and sum files 
+COPY go.mod go.sum ./
+
+# Download all dependencies.
+RUN go mod download
+
+# Copy the source code.
 COPY . .
 
-ENV CGO_ENABLED=1
-ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
-RUN go build -o build/x-ui main.go
-RUN ./DockerInit.sh "$TARGETARCH"
+# Install Air for hot reloading
+RUN go get -u github.com/cosmtrek/air
 
-# ========================================================
-# Stage: Final Image of 3x-ui
-# ========================================================
-FROM alpine
-ENV TZ=Asia/Tehran
+# This stage builds the application.
+FROM golang:1.21.6-alpine
+
 WORKDIR /app
 
-RUN apk add --no-cache --update \
-  ca-certificates \
-  tzdata \
-  fail2ban
+# Copy the binary from the builder stage.
+COPY --from=builder /app /app
+COPY --from=builder /go/bin/air /bin/air
 
-COPY --from=builder /app/build/ /app/
-COPY --from=builder /app/DockerEntrypoint.sh /app/
-COPY --from=builder /app/x-ui.sh /usr/bin/x-ui
-
-# Configure fail2ban
-RUN rm -f /etc/fail2ban/jail.d/alpine-ssh.conf \
-  && cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local \
-  && sed -i "s/^\[ssh\]$/&\nenabled = false/" /etc/fail2ban/jail.local \
-  && sed -i "s/^\[sshd\]$/&\nenabled = false/" /etc/fail2ban/jail.local \
-  && sed -i "s/#allowipv6 = auto/allowipv6 = auto/g" /etc/fail2ban/fail2ban.conf
-
-RUN chmod +x \
-  /app/DockerEntrypoint.sh \
-  /app/x-ui \
-  /usr/bin/x-ui
-
-VOLUME [ "/etc/x-ui" ]
-ENTRYPOINT [ "/app/DockerEntrypoint.sh" ]
+# The command to run when this image is used.
+CMD ["air"]
