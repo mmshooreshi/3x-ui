@@ -237,12 +237,6 @@ func (t *Tgbot) answerCommand(message *telego.Message, chatId int64, isAdmin boo
 		msg += t.I18nBot("tgbot.commands.status")
 	case "id":
 		onlyMessage = true
-	case "farzam":
-		msg += "Hi, "
-		if isAdmin {
-			msg += t.I18nBot("tgbot.commands.welcome", "Hostname=="+hostname)
-		}
-		msg += "\n\n u farzam, am i right?"
 	case "usage":
 		onlyMessage = true
 		if len(commandArgs) > 0 {
@@ -261,9 +255,25 @@ func (t *Tgbot) answerCommand(message *telego.Message, chatId int64, isAdmin boo
 		} else {
 			msg += t.I18nBot("tgbot.commands.unknown")
 		}
+	case "version":
+		onlyMessage = true
+		// Assuming the version is stored in a constant or accessible through a method.
+		msg += "Bot Version: " + config.GetVersion()
+
+	case "uptime":
+		onlyMessage = true
+		// Assuming there's a method to calculate uptime. This is a placeholder implementation.
+		uptime := "123 hours" // Placeholder value, you should implement the actual uptime calculation.
+		msg += "Bot Uptime: " + uptime
+
+	case "support":
+		onlyMessage = true
+		msg += "For support, contact admin@example.com or visit our support channel."
+
 	default:
 		msg += t.I18nBot("tgbot.commands.unknown")
 	}
+
 
 	if msg != "" {
 		if onlyMessage {
