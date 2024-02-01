@@ -1,5 +1,5 @@
 # Start from the official Golang image to create a build artifact.
-FROM golang:1.21-alpine as builder
+FROM golang:latest as builder
 
 WORKDIR /app
 
@@ -23,19 +23,7 @@ RUN go install github.com/cosmtrek/air@latest
 RUN which air
 
 # This stage builds the application.
-FROM golang:1.21-alpine
-
+FROM golang:latest
+RUN go get -u github.com/cosmtrek/air
 WORKDIR /app
-
-# Copy the application files from the builder stage.
-COPY --from=builder /app /app
-
-# Copy the air binary from the builder stage.
-# The path should be adjusted to wherever `which air` reports it to be.
-# COPY --from=builder /go/bin/air /bin/air
-
-# Copy .air.toml from the builder stage.
-# Ensure this file exists in your project directory.
-COPY --from=builder /app/.air.toml /.air.toml
-
-CMD ["air"]
+ENTRYPOINT ["air"]
