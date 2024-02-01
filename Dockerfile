@@ -1,7 +1,6 @@
 # Start from the official Golang image to create a build artifact.
 FROM golang:1.21.6-alpine as builder
 
-# This stage installs all the dependencies.
 WORKDIR /app
 
 # Install system dependencies
@@ -24,9 +23,9 @@ FROM golang:1.21.6-alpine
 
 WORKDIR /app
 
-# Copy the binary from the builder stage.
+# Copy the binary and other necessary files from the builder stage.
 COPY --from=builder /app /app
 COPY --from=builder /go/bin/air /bin/air
+COPY --from=builder /app/.air.toml /.air.toml
 
-# The command to run when this image is used.
 CMD ["air"]
