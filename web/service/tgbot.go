@@ -237,7 +237,8 @@ func (t *Tgbot) answerCommand(message *telego.Message, chatId int64, isAdmin boo
 		msg += t.I18nBot("tgbot.commands.status")
 	case "id":
 		onlyMessage = true
-		msg += t.I18nBot("tgbot.commands.getID", "ID=="+strconv.FormatInt(message.From.ID, 10))
+	case "farzam":
+		msg += "FARZAMMMM"
 	case "usage":
 		onlyMessage = true
 		if len(commandArgs) > 0 {
